@@ -297,6 +297,10 @@ int buildTestFat(int argc, char** argv) {
 }
 */
 
+/**
+ * Procedura která překládá číslo FAT na speciální hodnoty
+ *
+ * */
 char* printFat(int32_t fatValue){
     static char result[10];
     memset(result, '\0', sizeof(result));
@@ -315,6 +319,10 @@ char* printFat(int32_t fatValue){
 
 };
 
+/**
+ * Vypise vsechny podslazky slozky, rekurzivne
+ *
+ * */
 void printDirectoryPath(char clusters[FAT_SIZE], struct directory* dir, int* tabs){
     int i;
     while(strlen(dir->name) > 0){
@@ -337,6 +345,10 @@ void printDirectoryPath(char clusters[FAT_SIZE], struct directory* dir, int* tab
     printf("--\n");
 }
 
+/**
+ * Vypise strom souboroveho systemu
+ *
+ * */
 void printRoot(char clusters[FAT_SIZE]){
 
     int tabs = 0;
@@ -352,6 +364,10 @@ void printRoot(char clusters[FAT_SIZE]){
 
 }
 
+/**
+ * Vypise vsechny nenulove clustery s jejich obsahem
+ *
+ * */
 void printAll(int32_t fat1[FAT_SIZE], char clusters[FAT_SIZE]){
     int i, j;
     for (i = 0; i < FAT_SIZE; i++) {
@@ -365,6 +381,10 @@ void printAll(int32_t fat1[FAT_SIZE], char clusters[FAT_SIZE]){
     }
 }
 
+/**
+ * Vrati prvni volny cluster
+ *
+ * */
 int32_t getEmptyCluster(int32_t fat1[FAT_SIZE]){
     int i = 0;
     for (i = 0; i < FAT_SIZE; i++) {
@@ -375,6 +395,10 @@ int32_t getEmptyCluster(int32_t fat1[FAT_SIZE]){
     return -1;
 }
 
+/**
+ * Vrati pocet volnych clusteru
+ *
+ * */
 int getEmptyClustersCount(int32_t fat1[FAT_SIZE]){
     int cnt = 0;
     int i = 0;
@@ -386,6 +410,10 @@ int getEmptyClustersCount(int32_t fat1[FAT_SIZE]){
     return cnt;
 }
 
+/**
+ * Vrati ukazatel na volne misto v adresari, pokud se adresar nevejde vraci NULL
+ *
+ * */
 struct directory* getEmptyFolderSpace(char clusters[FAT_SIZE], struct directory* dir, int isRoot){
     struct directory *start;
     struct directory* tmp;
@@ -409,6 +437,12 @@ struct directory* getEmptyFolderSpace(char clusters[FAT_SIZE], struct directory*
     }
 }
 
+/**
+ * Vrati ukazatel na slozku nebo soubor se jmenem dirName,
+ * pokud se slozka nebo soubor s timto nazvem nenachazi v adresari where,
+ * vraci NULL
+ *
+ * */
 struct directory* findDirectory(struct directory* where ,char* dirName){
     while(strlen(where->name) > 0){
         if(strcmp(where->name, dirName) == 0){
@@ -420,6 +454,11 @@ struct directory* findDirectory(struct directory* where ,char* dirName){
 
 }
 
+/**
+ * Vrati ukazatel na slozku nebo soubor definovany zadanou cestou path,
+ * pokud je soubor nenalezen, vraci NULL
+ *
+ * */
 struct directory* findDirectoryByPath(char clusters[FAT_SIZE], char* path){
     char *p = strtok(path, "/");
     struct directory* dir = (struct directory*)clusters;
@@ -438,6 +477,10 @@ struct directory* findDirectoryByPath(char clusters[FAT_SIZE], char* path){
     return (struct directory*)clusters;
 }
 
+/**
+ * Vytvori slozku se jmenem name v ceste path
+ *
+ * */
 void createFolder(int32_t fat1[FAT_SIZE], int32_t fat2[FAT_SIZE],char clusters[FAT_SIZE],char* name,char* path){
     struct directory *dir;
     int isRoot = 0;
@@ -480,6 +523,10 @@ void createFolder(int32_t fat1[FAT_SIZE], int32_t fat2[FAT_SIZE],char clusters[F
     }
 }
 
+/**
+ * Pokud je slozka dir prazdna vraci true jinak false
+ *
+ * */
 int isFolderEmpty(char clusters[FAT_SIZE],struct directory* dir){
     struct directory *start = (struct directory *)(clusters + dir->start_cluster * CLUSTER_SIZE);
     if(strlen(start->name) > 0){
@@ -490,6 +537,11 @@ int isFolderEmpty(char clusters[FAT_SIZE],struct directory* dir){
 
 }
 
+/**
+ * Odstrani zaznam slozky nebo souboru se jmenem name,
+ * ze slozky dir a posune vsechny nasledovne zaznamy o jeden doleva
+ *
+ * */
 void removeDirectoryFromFolder(struct directory* dir ,char* name){
     int found = 0;
     while(strlen(dir->name) > 0){
@@ -506,6 +558,10 @@ void removeDirectoryFromFolder(struct directory* dir ,char* name){
     }
 }
 
+/**
+ * Odstrani slozku ktera se nachazi pod cestou fullPath
+ *
+ * */
 void removeFolder(int32_t fat1[FAT_SIZE], int32_t fat2[FAT_SIZE],char clusters[FAT_SIZE],char* fullPath){
     struct directory *dir;
     char name[100];
@@ -544,6 +600,10 @@ void removeFolder(int32_t fat1[FAT_SIZE], int32_t fat2[FAT_SIZE],char clusters[F
     }
 }
 
+/**
+ * Ulozi soubor na ktery ukazuje fp do cesty fullPath
+ *
+ * */
 void saveFile(int32_t fat1[FAT_SIZE], int32_t fat2[FAT_SIZE],char clusters[FAT_SIZE], FILE* fp,char* fullPath){
     struct directory* dir;
     char name[100];
@@ -621,6 +681,10 @@ void saveFile(int32_t fat1[FAT_SIZE], int32_t fat2[FAT_SIZE],char clusters[FAT_S
     }
 }
 
+/**
+ * Odstrani soubor ktery se nachazi pod cestou fullPath
+ *
+ * */
 void removeFile(int32_t fat1[FAT_SIZE], int32_t fat2[FAT_SIZE],char clusters[FAT_SIZE],char* fullPath){
     struct directory *dir;
     int i;
@@ -664,6 +728,10 @@ void removeFile(int32_t fat1[FAT_SIZE], int32_t fat2[FAT_SIZE],char clusters[FAT
     }
 }
 
+/**
+ * Vytiskne na obrazovku vsechny clustery na kterych se nachazi soubor pod cestou path
+ *
+ * */
 void printDirectoryClusters(int32_t fat1[FAT_SIZE], char clusters[FAT_SIZE],char* path){
     struct directory* dir = findDirectoryByPath(clusters, path);
     int clusterId;
@@ -681,6 +749,10 @@ void printDirectoryClusters(int32_t fat1[FAT_SIZE], char clusters[FAT_SIZE],char
     }
 }
 
+/**
+ * Vypise obsah souboru ktery se nachazi pod cestou path
+ *
+ * */
 void printDirectory(int32_t fat1[FAT_SIZE], char clusters[FAT_SIZE],char* path){
     struct directory* dir = findDirectoryByPath(clusters, path);
     int clusterId;
@@ -699,6 +771,10 @@ void printDirectory(int32_t fat1[FAT_SIZE], char clusters[FAT_SIZE],char* path){
     }
 }
 
+/**
+ * Vypise pomoc
+ *
+ * */
 void printHelp(){
     printf("RUN WITH ARGUMENTS!\n");
     printf("First arg =\tpath to fat data structure(created if file does not exists)\n");
@@ -711,6 +787,10 @@ void printHelp(){
     printf("\t\t[-p] print root tree\n");
 }
 
+/**
+ * Pokud se v clusteru nachazi znacky FFFFFF vraci true jinak false
+ *
+ * */
 int isClusterBad(char *cluster){
     int j;
     int rep = 0;
@@ -729,12 +809,20 @@ int isClusterBad(char *cluster){
     return 0;
 }
 
+/**
+ * Datova struktura pro predani poli vlaknum
+ *
+ * */
 struct dataArray{
     int32_t *fat1;
     int32_t *fat2;
     char *clusters;
 };
 
+/**
+ * Pretizena metoda getEmptyCluster, vyuziva mutexy pro vicevlaknove operace
+ *
+ * */
 int32_t getEmptyClusterMultithread(int32_t fat1[FAT_SIZE]){
     int i = 0;
     for (i = 0; i < FAT_SIZE; i++) {
@@ -748,6 +836,10 @@ int32_t getEmptyClusterMultithread(int32_t fat1[FAT_SIZE]){
     return -1;
 }
 
+/**
+ * Zjisti a opravi zaznam ve slozce, pokud je oldClusterValue prvni cluster nejakeho souboru
+ *
+ * */
 void repairPotentialDirectory(int32_t fat1[FAT_SIZE], char * clusters, int oldClusterValue, int newClusterValue){
     int i;
     struct directory *where;
@@ -764,6 +856,11 @@ void repairPotentialDirectory(int32_t fat1[FAT_SIZE], char * clusters, int oldCl
     }
 }
 
+/**
+ * Projde cluster a nahradi znaky, které se nachazi mezi oznacenim FFFFFF mezerami,
+ * pote nahraje upraveny obsah do prazdneho clusteru
+ *
+ * */
 void repairCluster(int32_t fat1[FAT_SIZE],int32_t fat2[FAT_SIZE],char *clusters, int32_t badCluster){
     int32_t emptyCluster = getEmptyClusterMultithread(fat1);
     int i, rep = 0;
@@ -807,7 +904,10 @@ void repairCluster(int32_t fat1[FAT_SIZE],int32_t fat2[FAT_SIZE],char *clusters,
     pthread_mutex_unlock(&mutexes[emptyCluster]);
 }
 
-
+/**
+ * Projde vsechny clustery a pokud jsou spatne tak je opravi
+ *
+ * */
 void repairBadClusters(int32_t fat1[FAT_SIZE],int32_t fat2[FAT_SIZE],char *clusters){
     int i;
     int e;
@@ -826,6 +926,10 @@ void repairBadClusters(int32_t fat1[FAT_SIZE],int32_t fat2[FAT_SIZE],char *clust
     }
 }
 
+/**
+ * Spousteci procedura vlakna
+ *
+ * */
 void *runThread(void *voidPtr){
     struct dataArray* da = (struct dataArray*)voidPtr;
     int32_t *fat1 = da->fat1;
@@ -838,6 +942,10 @@ void *runThread(void *voidPtr){
     return 0;
 }
 
+/**
+ * Inicializuje mutexy, vlakna, spusti a pote zpetne joine. Opravi celou FAT
+ *
+ * */
 void repair(int32_t fat1[FAT_SIZE],int32_t fat2[FAT_SIZE],char clusters[FAT_SIZE],int threadCnt){
     pthread_t threads[threadCnt];
     int i = 0;
@@ -868,6 +976,10 @@ void repair(int32_t fat1[FAT_SIZE],int32_t fat2[FAT_SIZE],char clusters[FAT_SIZE
     printf("OK\n");
 }
 
+/**
+ * Prida znacky FFFFFF do vsech datovych clusteru
+ *
+ * */
 void corrupt(int32_t fat1[FAT_SIZE],char clusters[FAT_SIZE]){
     int i, j;
     for (i = 0; i < FAT_SIZE; ++i) {
@@ -883,6 +995,12 @@ void corrupt(int32_t fat1[FAT_SIZE],char clusters[FAT_SIZE]){
     printf("OK\n");
 }
 
+/**
+ * Inicializace a reakce na vstupni argumenty
+ * po spusteni nacte FAT ze souboru do pameti
+ * a po dokonceni zapise FAT zpet do souboru
+ *
+ * */
 int main(int argc, char** argv) {
     int i,j;
     FILE *fp;
