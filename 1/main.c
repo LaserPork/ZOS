@@ -780,13 +780,15 @@ void printDirectory(int32_t fat1[FAT_SIZE], char clusters[FAT_SIZE],char* path){
         printf("%s: ", dir->name);
         clusterId = dir->start_cluster;
         printf("%s", clusters + clusterId * CLUSTER_SIZE);
-        while (fat1[clusterId] != FAT_FILE_END && fat1[clusterId] != FAT_DIRECTORY){
+        while (fat1[clusterId] != FAT_FILE_END && fat1[clusterId] != FAT_DIRECTORY) {
             clusterId = fat1[clusterId];
-
-            printf("%s", clusters + clusterId * CLUSTER_SIZE);
+            int j = 0;
+            while (*(clusters + clusterId * CLUSTER_SIZE + j) != '\0') {
+                printf("%c", *(clusters + clusterId * CLUSTER_SIZE + j));
+                j++;
+            }
+            /* printf("%s", clusters + clusterId * CLUSTER_SIZE);*/
         }
-        printf("\r\n");
-
     }
 }
 
