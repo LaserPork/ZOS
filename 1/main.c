@@ -485,8 +485,18 @@ void createFolder(int32_t fat1[FAT_SIZE], int32_t fat2[FAT_SIZE],char clusters[F
     struct directory *dir;
     int isRoot = 0;
     int32_t clusterId;
+    char fullPath[100];
     if(strlen(path) == 1){
         isRoot = 1;
+    }
+    memset(fullPath, '\0', sizeof(fullPath));
+    strcpy(fullPath, path);
+    fullPath[strlen(fullPath) - 1] = '/';
+    strcpy(&fullPath[strlen(fullPath)],name);
+    dir = findDirectoryByPath(clusters, fullPath);
+    if(dir != NULL) {
+        printf("FOLDER ALREADY EXISTS\n");
+        return;
     }
     dir = findDirectoryByPath(clusters, path);
     if(dir == NULL){
@@ -616,6 +626,11 @@ void saveFile(int32_t fat1[FAT_SIZE], int32_t fat2[FAT_SIZE],char clusters[FAT_S
     strcpy(path, fullPath);
     if(fullPath[strlen(fullPath) - 1] == '/'){
         printf("PATH MUST END WITH FILE NAME\n");
+        return;
+    }
+    dir = findDirectoryByPath(clusters, fullPath);
+    if(dir != NULL) {
+        printf("FILE ALREADY EXISTS\n");
         return;
     }
     p = strtok(path, "/");
