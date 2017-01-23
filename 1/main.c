@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <time.h>
+#include <unistd.h>
+#include <sys/types.h>
 
 //pocitame s FAT32 MAX - tedy horni 4 hodnoty
 const int32_t FAT_UNUSED = INT32_MAX - 1;
@@ -780,9 +782,11 @@ void printDirectory(int32_t fat1[FAT_SIZE], char clusters[FAT_SIZE],char* path){
         printf("%s", clusters + clusterId * CLUSTER_SIZE);
         while (fat1[clusterId] != FAT_FILE_END && fat1[clusterId] != FAT_DIRECTORY){
             clusterId = fat1[clusterId];
+
             printf("%s", clusters + clusterId * CLUSTER_SIZE);
         }
-        printf("\n");
+        printf("\r\n");
+
     }
 }
 
@@ -1124,6 +1128,11 @@ int main(int argc, char** argv) {
     for (i = 0; i < FAT_SIZE; i++) {
         fwrite(clusters + i * CLUSTER_SIZE, CLUSTER_SIZE, 1, fp);
     }
+    /*
+    fseeko(fp,-1,SEEK_END);
+    off_t position = ftello(fp);
+    ftruncate(fileno(fp), position);
+     */
     fclose(fp);
 
     return 0;
